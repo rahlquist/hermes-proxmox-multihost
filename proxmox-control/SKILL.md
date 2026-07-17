@@ -26,8 +26,8 @@ pip install proxmoxer requests
 ## Multi-Host (Standalone Servers)
 
 The patterns above assume a single `PROXMOX_HOST`. For **N standalone Proxmox
-servers, each with its own login**, use the bundled helper `references/proxmox_multi.py`
-and a host registry JSON (`~/.config/proxmox-hosts.json`).
+servers, each with its own login, use the bundled helper
+`scripts/proxmox_multi.py` and a host registry JSON (`~/.config/proxmox-hosts.json`).
 
 ### Registry format
 
@@ -65,9 +65,9 @@ Secret spec forms: `{ "env": "VAR" }`, `{ "bwsm": "<uuid>" }`, or
 ### Using the helper
 
 ```python
-# helper lives in references/ — run from the skill root and reference it there,
+# helper lives in scripts/ — run from the skill root and reference it there,
 # or add the dir to sys.path:
-import sys; sys.path.insert(0, "references")
+import sys; sys.path.insert(0, "scripts")
 from proxmox_multi import get_client, get_all, list_hosts
 
 pve1 = get_client("pve1")          # single host ProxmoxAPI
@@ -85,8 +85,8 @@ CLI smoke test (no VM changes):
 
 ```bash
 cd ~/.hermes/skills/proxmox-control
-.venv/bin/python references/proxmox_multi.py --list-hosts
-.venv/bin/python references/proxmox_multi.py --status
+.venv/bin/python scripts/proxmox_multi.py --list-hosts
+.venv/bin/python scripts/proxmox_multi.py --status
 ```
 
 ### Gotchas (verified)
