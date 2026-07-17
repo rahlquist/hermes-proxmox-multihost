@@ -70,8 +70,8 @@ Or clone and drop `SKILL.md` + `references/` into your profile's skills dir
 4. Smoke test (read-only):
    ```bash
    cd ~/.hermes/skills/proxmox-control
-   .venv/bin/python references/proxmox_multi.py --list-hosts
-   .venv/bin/python references/proxmox_multi.py --status
+   .venv/bin/python scripts/proxmox_multi.py --list-hosts
+   .venv/bin/python scripts/proxmox_multi.py --status
    ```
 
 ## Usage
@@ -89,7 +89,7 @@ for name, px in get_all().items():
 ```
 
 Run from inside `~/.hermes/skills/proxmox-control` (or set
-`PYTHONPATH=references`) so `proxmox_multi` is importable.
+`PYTHONPATH=scripts`) so `proxmox_multi` is importable.
 
 ## Verified gotchas
 
@@ -106,9 +106,9 @@ Run from inside `~/.hermes/skills/proxmox-control` (or set
 | File | Purpose |
 |------|---------|
 | `SKILL.md` | Skill definition (Hermes loads this) |
-| `references/proxmox_multi.py` | Multi-host helper (`get_client` / `get_all` / `list_hosts`) |
+| `scripts/proxmox_multi.py` | Multi-host helper (`get_client` / `get_all` / `list_hosts`) |
 | `references/proxmox-hosts.example.json` | Registry template |
-| `MULTI_HOST_SETUP.md` | Full setup summary & instructions |
+| `references/proxmoxer-gotchas.md` | Verified proxmoxer behavior and troubleshooting |
 
 ## Credits
 

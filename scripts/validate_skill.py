@@ -8,7 +8,7 @@ Checks (per SKILL.md found):
   - description: 1-1024 chars
   - 'license' field recommended when a LICENSE file is bundled (warning)
   - SKILL.md UTF-8 readable, non-empty body
-  - Any `references/<file>` link resolves to a real file
+  - Any local references/, scripts/, or templates/ path resolves to a real file
 
 Run: python3 scripts/validate_skill.py  (from repo root)
 Exit non-zero on any failure.
@@ -96,12 +96,12 @@ def validate_one(path: Path):
         warnings.append(f"{path}: no 'license' field though LICENSE is bundled (recommended)")
     if not body.strip():
         errors.append(f"{path}: empty body")
-    # check referenced files under references/ and relative links exist
+    # Check referenced local support files and relative links exist
     base = path.parent
-    for m in re.finditer(r"references/([\w./-]+)", body):
-        ref = base / m.group(0)  # group(0) keeps the "references/" prefix
+    for m in re.finditer(r"(?:references|scripts|templates)/([\w./-]+)", body):
+        ref = base / m.group(0)
         if not ref.exists():
-            errors.append(f"{path}: references missing file: {m.group(0)}")
+            errors.append(f"{path}: missing support file: {m.group(0)}")
     return errors, warnings
 
 
