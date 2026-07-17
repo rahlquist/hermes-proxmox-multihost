@@ -16,3 +16,5 @@ jobs:
           python-version: "3.11"
       - name: Validate skill structure
         run: python3 scripts/validate_skill.py
+      - name: Test multi-host helper
+        run: python3 -m unittest discover -s tests -v
