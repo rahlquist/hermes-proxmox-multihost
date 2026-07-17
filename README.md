@@ -25,7 +25,7 @@ registry + a small multi-host helper.
 
 ```bash
 hermes skills install \
-  https://raw.githubusercontent.com/rahlquist/hermes-proxmox-multihost/main/SKILL.md \
+  https://raw.githubusercontent.com/rahlquist/hermes-proxmox-multihost/main/proxmox-control/SKILL.md \
   --yes
 ```
 
