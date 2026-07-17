@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Local registry with real credentials — NEVER commit
+proxmox-hosts.json
+*.local.json
+
+# Editor
+.idea/
+.vscode/

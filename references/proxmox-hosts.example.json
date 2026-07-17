@@ -1,0 +1,36 @@
+{
+  "hosts": {
+    "pve1": {
+      "host": "192.168.8.10",
+      "port": 8006,
+      "verify_ssl": false,
+      "auth": {
+        "type": "token",
+        "user": "root@pam",
+        "token_id": "root@pam!agent",
+        "secret": { "env": "PROXMOX_PVE1_TOKEN_SECRET" }
+      }
+    },
+    "pve2": {
+      "host": "192.168.8.11",
+      "port": 8006,
+      "verify_ssl": false,
+      "auth": {
+        "type": "password",
+        "user": "root@pam",
+        "secret": { "env": "PROXMOX_PVE2_PASSWORD" }
+      }
+    },
+    "pve3": {
+      "host": "192.168.8.12",
+      "port": 8006,
+      "verify_ssl": false,
+      "auth": {
+        "type": "token",
+        "user": "admin@pve",
+        "token_id": "admin@pve!agent",
+        "secret": { "bwsm": "REPLACE_WITH_BWSM_SECRET_UUID" }
+      }
+    }
+  }
+}
