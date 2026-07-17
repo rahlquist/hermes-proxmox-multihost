@@ -108,6 +108,8 @@ Run from inside `~/.hermes/skills/proxmox-control` (or set
 | `SKILL.md` | Skill definition (Hermes loads this) |
 | `references/proxmox_multi.py` | Multi-host helper (`get_client` / `get_all` / `list_hosts`) |
 | `references/proxmox-hosts.example.json` | Registry template |
+| `references/proxmoxer-gotchas.md` | Verified proxmoxer behavior and troubleshooting |
+| `references/operations.md` | Confirmed guest operation recipes and safety checks |
 | `MULTI_HOST_SETUP.md` | Full setup summary & instructions |
 
 ## Credits
