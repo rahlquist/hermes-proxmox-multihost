@@ -65,6 +65,9 @@ Secret spec forms: `{ "env": "VAR" }`, `{ "bwsm": "<uuid>" }`, or
 ### Using the helper
 
 ```python
+# helper lives in references/ — run from the skill root and reference it there,
+# or add the dir to sys.path:
+import sys; sys.path.insert(0, "references")
 from proxmox_multi import get_client, get_all, list_hosts
 
 pve1 = get_client("pve1")          # single host ProxmoxAPI
@@ -356,14 +359,16 @@ node.qemu(vm_id).config.post(template=0, vmid=None)
 ## Error Handling
 
 ```python
-from proxmoxer import ProxmoxWebAPIError, ProxmoxAPIError
+# proxmoxer 2.x exposes only AuthenticationError and ResourceException at the
+# top level (no ProxmoxAPIError / ProxmoxWebAPIError classes exist):
+from proxmoxer import ResourceException, AuthenticationError
 
 try:
     proxmox.nodes(node_name).qemu(vm_id).status.current.get()
-except ProxmoxWebAPIError as e:
-    print(f"Web/API error: {e}")
-except ProxmoxAPIError as e:
-    print(f"Proxmox error: {e}")
+except ResourceException as e:
+    print(f"Proxmox API error: {e}")
+except AuthenticationError as e:
+    print(f"Auth error: {e}")
 except Exception as e:
     print(f"Unexpected error: {e}")
 ```
@@ -390,7 +395,6 @@ except Exception as e:
 | **Node name errors** | Never hardcode `'pve'`. Always discover via `proxmox.nodes.get()` — your cluster may use `prox`, `pve01`, etc. |
 | **SSL verification failed** | Set `verify_ssl=False` for internal LAN. For production, install the Proxmox CA cert and set `verify_ssl=True`. |
 | **Connection refused** | Check `PROXMOX_HOST` and `PROXMOX_PORT`. Ensure the host is reachable on the network. |
-| **Token secret "regenerates"** | Editing a token in the Proxmox UI generates a new secret. The token ID stays the same, but the secret is different. Always copy the new secret after editing. |
 | **Task ID parsing** | `proxmoxer` handles task tracking. After an operation, the response includes an `upid` field. Extract the task ID from `upid.split(':')[1]`. |
 
 ## Environment Variables Reference
