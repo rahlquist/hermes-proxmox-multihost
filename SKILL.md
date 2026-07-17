@@ -1,6 +1,7 @@
 ---
 name: proxmox-control
-description: Control a Proxmox VE hypervisor via the REST API. Covers VM status, power management, snapshots, resource monitoring, storage, and template cloning.
+description: Control Proxmox VE hypervisors via the REST API — VM/container status, power management, snapshots, resource monitoring, storage, and template cloning. Use when managing one or more standalone Proxmox VE servers or a Proxmox cluster (list/start/stop VMs, take snapshots, check node health, clone templates).
+license: MIT
 category: devops
 ---
 
