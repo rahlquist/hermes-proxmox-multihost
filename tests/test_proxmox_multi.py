@@ -9,7 +9,15 @@ from pathlib import Path
 from unittest.mock import patch
 
 
-SCRIPT = Path(__file__).parents[1] / "proxmox-control" / "references" / "proxmox_multi.py"
+ROOT = Path(__file__).parents[1]
+SCRIPT = next(
+    path
+    for path in (
+        ROOT / "proxmox-control" / "scripts" / "proxmox_multi.py",
+        ROOT / "proxmox-control" / "references" / "proxmox_multi.py",
+    )
+    if path.is_file()
+)
 
 
 def load_helper(fake_client):
@@ -17,7 +25,8 @@ def load_helper(fake_client):
     setattr(fake_proxmoxer, "ProxmoxAPI", fake_client)
     with patch.dict(sys.modules, {"proxmoxer": fake_proxmoxer}):
         spec = importlib.util.spec_from_file_location("proxmox_multi_under_test", SCRIPT)
-        assert spec is not None and spec.loader is not None
+        if spec is None or spec.loader is None:
+            raise RuntimeError(f"unable to load helper from {SCRIPT}")
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
     return module
