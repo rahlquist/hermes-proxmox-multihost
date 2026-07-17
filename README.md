@@ -112,5 +112,11 @@ Run from inside `~/.hermes/skills/proxmox-control` (or set
 
 ## Credits
 
-- Base skill: [danielbitpro/hermes-proxmox-control](https://github.com/danielbitpro/hermes-proxmox-control)
+- **Daniel** ([danielbitpro](https://github.com/danielbitpro/)) — thank you for
+  the original Proxmox skill ([hermes-proxmox-control](https://github.com/danielbitpro/hermes-proxmox-control)),
+  which this multi-host extension is built on top of.
+- **Magnus** ([magnus919](https://github.com/magnus919/)) — thank you for
+  [hermes-SkillOpt](https://github.com/magnus919/hermes-SkillOpt) (the optimization
+  methodology used to verify and harden this skill's docs) and for the `de-spin`
+  skill (used to de-spin the factual claims about `proxmoxer` behavior).
 - Multi-host extension added by rahlquist.
