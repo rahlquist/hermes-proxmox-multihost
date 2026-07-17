@@ -247,28 +247,9 @@ print(f"Disks: {config.get('scsi0', 'N/A')}, Boot: {config.get('boot', 'N/A')}")
 
 ### Power Management
 
-```python
-# Start a VM
-node.qemu(vm_id).status.current.post(starttime=0)
-
-# Graceful shutdown (send ACPI signal)
-node.qemu(vm_id).status.shutdown.post(forcestop=0)
-
-# Hard poweroff
-node.qemu(vm_id).status.stop.post()
-
-# Reboot
-node.qemu(vm_id).status.reboot.post(forcestop=0)
-
-# Wait for task completion
-import time
-task_id = status.get('upid', '').split(':')[1]
-while True:
-    task = node.tasks(task_id).status.get()
-    if task.get('status') == 'stopped':
-        break
-    time.sleep(1)
-```
+Load `references/operations.md` before performing a power operation. It contains
+verified QEMU and LXC resource paths, asynchronous-task tracking, and the
+confirmation requirements for state-changing calls.
 
 ## LXC Container Management
 
@@ -286,112 +267,15 @@ print(f"Template: {config.get('template', False)}, Unprivileged: {config.get('un
 
 ### Power Management
 
-```python
-# Start a container
-node.lxc(ct_id).status.start.post()
+Use the power-operation section of `references/operations.md`. It distinguishes
+graceful shutdown from hard stop and records the returned task UPID for follow-up.
 
-# Graceful shutdown (send ACPI signal) — NO forcestop param
-node.lxc(ct_id).status.shutdown.post()
+## State-changing operations
 
-# Force stop (hard poweroff) — forcestop param here
-node.lxc(ct_id).status.stop.post(forcestop=1)
-
-# Reboot
-node.lxc(ct_id).status.reboot.post(forcestop=0)
-
-# Check status after operation
-import time
-for i in range(30):
-    time.sleep(2)
-    status = node.lxc(ct_id).status.current.get()
-    if status['status'] == 'stopped':
-        print(f"Container stopped")
-        break
-    if i >= 14:
-        print(f"Timeout — container may still be stopping")
-```
-
-> **⚠️ LXC Shutdown Gotcha:** The `forcestop` parameter is **not valid** for `lxc().status.shutdown.post()`. It only works on `lxc().status.stop.post()`. Passing it to shutdown.post() returns `400 Bad Request: property is not defined in schema`.
-
-> **⚠️ Graceful Shutdown Timeout:** LXC containers rely on ACPI signals inside the container. If the container has no guest agent or processes don't respond to ACPI, shutdown may hang indefinitely. Consider using `stop.post(forcestop=1)` after ~60s if `shutdown.post()` doesn't complete.
-
-## Snapshots
-
-```python
-# Create a snapshot
-node.qemu(vm_id).snapshot.post(snapshot='pre_update')
-
-# List snapshots
-for snap in node.qemu(vm_id).snapshot.get():
-    print(f"{snap['name']} — {snap['ctime']}")
-
-# Revert to snapshot
-node.qemu(vm_id).snapshot('snapshot_name').rollback.post()
-
-# Delete snapshot
-node.qemu(vm_id).snapshot('old_snapshot').delete.post()
-
-# Delete all snapshots older than N days (example)
-import datetime
-cutoff = datetime.datetime.now() - datetime.timedelta(days=7)
-for snap in node.qemu(vm_id).snapshot.get():
-    snap_time = datetime.datetime.fromtimestamp(snap['ctime'])
-    if snap_time < cutoff:
-        node.qemu(vm_id).snapshot(snap['name']).delete.post()
-```
-
-## Resource Monitoring
-
-```python
-# Node-level resources
-resources = proxmox.nodes(node_name).resources.get()
-for res in resources:
-    print(f"{res['type']} {res['id']}: CPU={res.get('cpu',0):.2f}, "
-          f"MEM={res.get('memory',0)/1024/1024:.0f}MB, "
-          f"DISK={res.get('disk',0)/1024/1024:.0f}MB")
-
-# Individual VM metrics (only for running VMs)
-for vm in node.qemu.get():
-    if vm['status'] == 'running':
-        cur = node.qemu(vm['vmid']).status.current.get()
-        print(f"{vm['name']}: CPU={cur.get('cpu',0):.2f}%, "
-              f"RAM={cur.get('maxmem',0)/1024/1024:.0f}MB, "
-              f"Disk R/W={cur.get('diskread',0)//1024}KB/{cur.get('diskwrite',0)//1024}KB")
-```
-
-## Storage Management
-
-```python
-# List all storage
-for store in proxmox.storage.get():
-    print(f"{store['storage']:20s} type={store['type']:10s} "
-          f"avail={store.get('avail',0)/1024/1024:.0f}MB / "
-          f"total={store.get('total',0)/1024/1024:.0f}MB")
-
-# Add disk to VM
-node.qemu(vm_id).config.post(
-    virtio='/local-zfs:vm-{vm_id}-disk-1,size=20G'
-)
-```
-
-## Template & Cloning
-
-```python
-# Clone a template to a new VM
-node.clone.post(
-    sourceid=template_id,
-    newid=new_vm_id,
-    name='new-vm-name',
-    storage='local-zfs',
-    unprivileged=1  # Set to 0 for privileged container
-)
-
-# Convert VM to template
-node.qemu(vm_id).config.post(template=1)
-
-# Convert template back to VM
-node.qemu(vm_id).config.post(template=0, vmid=None)
-```
+Load `references/operations.md` for snapshots, storage inspection, cloning, and
+template conversion. Those recipes are deliberately separate from the default
+skill instructions because they require an identified target and explicit user
+confirmation.
 
 ## Error Handling
 
