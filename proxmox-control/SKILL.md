@@ -31,36 +31,48 @@ servers, each with its own login, use the bundled helper
 
 ### Registry format
 
-Secrets are NEVER stored plaintext. Resolve them from env vars or Bitwarden
-Secrets Manager (BWSM):
+Secrets are NEVER stored plaintext. **Recommended: resolve from Bitwarden
+Secrets Manager (BWSM)** — env-var secrets silently fail in fresh Hermes
+sessions because the agent doesn't inherit your shell exports.
 
 ```json
 {
   "hosts": {
     "pve1": {
       "host": "192.168.8.10", "port": 8006, "verify_ssl": false,
-      "auth": { "type": "token", "user": "root@pam",
-                "token_id": "root@pam!agent",
-                "secret": { "env": "PROXMOX_PVE1_TOKEN_SECRET" } }
+      "auth": { "type": "password", "user": "root@pam",
+                "secret": { "bwsm": "89fcfbcf-a30d-..." } }
     },
     "pve2": {
       "host": "192.168.8.11", "port": 8006, "verify_ssl": false,
-      "auth": { "type": "password", "user": "root@pam",
-                "secret": { "env": "PROXMOX_PVE2_PASSWORD" } }
+      "auth": { "type": "token", "user": "root@pam",
+                "token_id": "root@pam!agent",
+                "secret": { "bwsm": "5c916de8-1ff5-..." } }
     },
     "pve3": {
       "host": "192.168.8.12", "port": 8006, "verify_ssl": false,
-      "auth": { "type": "token", "user": "admin@pve",
-                "token_id": "admin@pve!agent",
-                "secret": { "bwsm": "<BWSM_SECRET_UUID>" } }
+      "auth": { "type": "password", "user": "root@pam",
+                "secret": { "env": "PROXMOX_PVE3_PASSWORD" } }
     }
   }
 }
 ```
 
-Secret spec forms: `{ "env": "VAR" }`, `{ "bwsm": "<uuid>" }`, or
+Secret spec forms: `{ "bwsm": "<uuid>" }` (recommended), `{ "env": "VAR" }`, or
 `{ "value": "..." }` (discouraged — warns). See
 `references/proxmox-hosts.example.json`.
+
+**Find the BWSM UUID for a secret:**
+```bash
+bws project list                  # pick your project id
+bws secret list <PROJECT_ID>      # copy the `id` field of each secret
+```
+`bws secret get` takes the UUID, NOT the key name. `BWS_ACCESS_TOKEN` must be
+exported in the environment (recover from `~/.hermes/state-snapshots/*/.env`
+if missing).
+
+`chmod 600 ~/.config/proxmox-hosts.json` — the registry maps hostnames to
+secret UUIDs.
 
 ### Using the helper
 
@@ -88,6 +100,30 @@ cd ~/.hermes/skills/proxmox-control
 .venv/bin/python scripts/proxmox_multi.py --list-hosts
 .venv/bin/python scripts/proxmox_multi.py --status
 ```
+
+Expected: `pveN: OK -> <nodename>(online)`. Anything else — decode it:
+
+| Smoke-test output | Cause | Fix |
+|---|---|---|
+| `BUILD ERROR -> env var X not set` | Host uses `{ "env": "X" }`, var not exported | Switch to `{ "bwsm": "<uuid>" }` (survives sessions), or `export X=...` in this shell |
+| `BUILD ERROR -> BWS_ACCESS_TOKEN not set` | Helper can't call `bws` | `export BWS_ACCESS_TOKEN=...` (recover from `~/.hermes/state-snapshots/*/.env`) |
+| `BUILD ERROR -> bws get failed for <uuid>` | Wrong UUID or no BWSM access | Re-run `bws secret list <PROJECT_ID>` and copy the `id` field |
+| `BUILD ERROR -> HTTPSConnection... refused` | Host unreachable / wrong IP | `ping <host>` — must be reachable **from the agent host**, not just your client |
+| `ERROR -> 401 ...` | Connected, auth rejected | See Troubleshooting below (realm, role) |
+| `ERROR -> 595 ...` | Connected, no permission | `pveum aclmod / -u <user@realm> -role PVEAdmin` |
+
+### After a green smoke test — what next
+
+- Just ask Hermes: *"list VMs on pve2"* / *"status of all my proxmox hosts"* —
+  the agent loads this skill and uses the helper.
+- Add a host: append a block to `~/.config/proxmox-hosts.json`, store the
+  secret in BWSM, reference its UUID. Nothing else to change.
+- Rotate a secret: rotate on the Proxmox side, create a new BWSM secret, paste
+  the new UUID into the registry. Re-run `--status` before deleting the old
+  BWSM entry.
+- State-changing operations (start/stop/snapshot/clone) live in
+  `references/operations.md` — read it first; power ops always require user
+  confirmation.
 
 ### Gotchas (verified)
 

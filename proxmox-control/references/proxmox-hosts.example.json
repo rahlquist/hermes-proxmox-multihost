@@ -5,10 +5,9 @@
       "port": 8006,
       "verify_ssl": false,
       "auth": {
-        "type": "token",
+        "type": "password",
         "user": "root@pam",
-        "token_id": "root@pam!agent",
-        "secret": { "env": "PROXMOX_PVE1_TOKEN_SECRET" }
+        "secret": { "bwsm": "REPLACE_WITH_BWSM_SECRET_UUID" }
       }
     },
     "pve2": {
@@ -16,9 +15,10 @@
       "port": 8006,
       "verify_ssl": false,
       "auth": {
-        "type": "password",
+        "type": "token",
         "user": "root@pam",
-        "secret": { "env": "PROXMOX_PVE2_PASSWORD" }
+        "token_id": "root@pam!agent",
+        "secret": { "bwsm": "REPLACE_WITH_BWSM_SECRET_UUID" }
       }
     },
     "pve3": {
@@ -26,10 +26,9 @@
       "port": 8006,
       "verify_ssl": false,
       "auth": {
-        "type": "token",
+        "type": "password",
         "user": "admin@pve",
-        "token_id": "admin@pve!agent",
-        "secret": { "bwsm": "REPLACE_WITH_BWSM_SECRET_UUID" }
+        "secret": { "env": "PROXMOX_PVE3_PASSWORD" }
       }
     }
   }
